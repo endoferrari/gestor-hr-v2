@@ -1,0 +1,32 @@
+[tool.pytest.ini_options]
+# Le dice a pytest que busque módulos desde la carpeta raíz
+pythonpath = "."
+
+[tool.mypy]
+# Reglas estrictas para el chequeo de tipos
+strict = true
+ignore_missing_imports = true
+
+[tool.ruff]
+# Compatible con el formateador Black
+line-length = 88
+
+[project]
+name = "gestor-hr-v2"
+version = "0.1.0"
+description = "Sistema de gestión hotelera con FastAPI y SQLAlchemy"
+authors = ["Tu Nombre <tu@email.com>"]
+dependencies = [
+    "fastapi[all]",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "ruff",
+    "pytest",
+    "mypy",
+    "pre-commit",
+    "pytest-watch"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
