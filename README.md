@@ -25,23 +25,27 @@ Sistema moderno de gestión hotelera desarrollado con **FastAPI**, **SQLAlchemy*
 ### Instalación
 
 1. **Clona el repositorio**
+
    ```bash
    git clone <tu-repositorio>
    cd gestor_hr_v2
    ```
 
 2. **Crea y activa el entorno virtual**
+
    ```bash
    python -m venv venv
    .\venv\Scripts\Activate.ps1  # Windows PowerShell
    ```
 
 3. **Instala las dependencias**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 4. **Configura las variables de entorno**
+
    ```bash
    cp .env.example .env
    # Edita el archivo .env con tu configuración
@@ -126,6 +130,7 @@ gestor_hr_v2/
 Para evitar problemas de código duplicado al trabajar con asistentes de IA:
 
 1. **Haz commit antes de cambios importantes**
+
    ```bash
    git add .
    git commit -m "Antes de refactorizar función X"

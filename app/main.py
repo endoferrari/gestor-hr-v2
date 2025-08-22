@@ -2,6 +2,7 @@
 Aplicación principal FastAPI
 """
 
+from typing import Dict
 from fastapi import FastAPI
 from app.core.config import settings
 
@@ -13,7 +14,7 @@ app = FastAPI(
 
 
 @app.get("/")
-async def root() -> dict[str, str]:
+async def root() -> Dict[str, str]:
     """Endpoint de bienvenida"""
     return {
         "message": "¡Bienvenido a Gestor HR v2.0!",
@@ -23,6 +24,6 @@ async def root() -> dict[str, str]:
 
 
 @app.get("/health")
-async def health_check() -> dict[str, str]:
+async def health_check() -> Dict[str, str]:
     """Endpoint de verificación de salud"""
     return {"status": "healthy", "environment": settings.ENVIRONMENT}

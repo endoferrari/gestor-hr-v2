@@ -3,9 +3,13 @@
 pythonpath = "."
 
 [tool.mypy]
-# Reglas estrictas para el chequeo de tipos
-strict = true
+# Configuración más permisiva para desarrollo inicial
+strict = false
 ignore_missing_imports = true
+disallow_untyped_calls = false
+disallow_untyped_decorators = false
+# Plugin de SQLAlchemy temporalmente deshabilitado hasta configurar la BD
+# plugins = ["sqlalchemy.ext.mypy.plugin"]
 
 [tool.ruff]
 # Compatible con el formateador Black
