@@ -93,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listener para el botón de logout
     document.getElementById('logout-button').addEventListener('click', () => {
         removeToken();
-        showMessage('Sesión cerrada exitosamente', 'success');
         updateUI(); // Esto ocultará el mapa y mostrará el login
     });
 

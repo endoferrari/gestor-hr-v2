@@ -1,5 +1,6 @@
 // /frontend/api.js
 import { API_BASE_URL } from './config.js';
+import { getToken } from './session.js';
 
 /**
  * Registra un nuevo usuario en el backend.
@@ -33,18 +34,52 @@ export async function registerUser(full_name, username, password) {
  * @returns {Promise<any>}
  */
 export async function loginUser(username, password) {
-    const response = await fetch(`${API_BASE_URL}/users/login/`, {
+    const response = await fetch(`${API_BASE_URL}/token`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({ username, password }),
+        body: new URLSearchParams({
+            username: username,
+            password: password
+        }),
     });
 
     if (!response.ok) {
         // Si el servidor responde con un error, lo capturamos
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Credenciales incorrectas.');
+    }
+
+    return response.json();
+}
+
+/**
+ * Obtiene la lista de todas las habitaciones desde el backend.
+ * Requiere un token de autenticación válido.
+ * @returns {Promise<Array>}
+ */
+export async function getHabitaciones() {
+    const token = getToken();
+    if (!token) {
+        throw new Error('No hay token de autenticación. Por favor, inicie sesión.');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/habitaciones/`, {
+        method: 'GET',
+        headers: {
+            // Así es como probamos que somos un usuario autenticado
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        // Esto podría pasar si el token expiró
+        if (response.status === 401) {
+            // En un futuro podríamos manejar el refresco del token aquí
+            throw new Error('Sesión expirada. Por favor, inicie sesión de nuevo.');
+        }
+        throw new Error('No se pudieron cargar las habitaciones.');
     }
 
     return response.json();

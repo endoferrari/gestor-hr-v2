@@ -46,10 +46,10 @@ def test_successful_login_flow(page: Page):
     # 8. Hacer clic en iniciar sesión
     page.click("#login-form button[type='submit']")
 
-    # 9. Verificar que aparece el panel de usuario
-    expect(page.locator("#user-panel")).to_be_visible()
-    expect(page.locator("#user-info")).to_contain_text(full_name)
-    expect(page.locator("#user-info")).to_contain_text(unique_username)
+    # 9. Verificar que aparece la vista de la aplicación con el mapa de habitaciones
+    expect(page.locator("#app-view")).to_be_visible()
+    expect(page.locator("#auth-view")).not_to_be_visible()
+    expect(page.locator(".room-card").first).to_be_visible()
 
 
 def test_login_with_invalid_credentials(page: Page):
@@ -76,7 +76,8 @@ def test_login_with_invalid_credentials(page: Page):
 
     # 6. Verificar que seguimos en el formulario de login
     expect(page.locator("#login-form-container")).to_be_visible()
-    expect(page.locator("#user-panel")).to_have_class("form-container hidden")
+    expect(page.locator("#auth-view")).to_be_visible()
+    expect(page.locator("#app-view")).not_to_be_visible()
 
 
 def test_logout_functionality(page: Page):
@@ -105,14 +106,16 @@ def test_logout_functionality(page: Page):
     page.click("#login-form button[type='submit']")
 
     # 3. Verificar que estamos logueados
-    expect(page.locator("#user-panel")).to_be_visible()
+    expect(page.locator("#app-view")).to_be_visible()
+    expect(page.locator("#auth-view")).not_to_be_visible()
 
-    # 4. Hacer click en cerrar sesión
-    page.click("button:has-text('Cerrar Sesión')")
+    # 4. Hacer click en cerrar sesión (usar el ID específico del botón)
+    page.click("#logout-button")
 
     # 5. Verificar que regresamos al formulario de login
     expect(page.locator("#login-form-container")).to_be_visible()
-    expect(page.locator("#user-panel")).to_have_class("form-container hidden")
+    expect(page.locator("#auth-view")).to_be_visible()
+    expect(page.locator("#app-view")).not_to_be_visible()
 
     # 6. Verificar mensaje de confirmación
     success_message = page.locator("#message-container")
@@ -147,3 +150,59 @@ def test_tab_switching(page: Page):
         "form-container hidden"
     )
     expect(page.locator(".tab-button.active")).to_contain_text("Iniciar Sesión")
+
+
+def test_login_shows_room_map_and_hides_auth_view(page: Page):
+    """
+    Verifica el flujo completo: el usuario inicia sesión y la vista
+    cambia correctamente al mapa de habitaciones.
+    """
+    # --- 1. SETUP: Crear un usuario único para esta prueba ---
+    unique_username = f"testuser_{uuid.uuid4().hex[:8]}"
+    password = "password123"
+
+    # Navegar a la página y registrar el usuario
+    page.goto("http://localhost:3000")  # Asegúrate de que el puerto sea el correcto
+    page.click("button:has-text('Registrarse')")
+    expect(page.locator("#register-form-container")).to_be_visible()
+
+    # Rellenar formulario de registro
+    page.fill("#register-form-container input[name='full_name']", "Test User Map")
+    page.fill("#register-form-container input[name='username']", unique_username)
+    page.fill("#register-form-container input[name='password']", password)
+
+    # Enviar registro y esperar respuesta de la API
+    with page.expect_response("**/api/users/") as response_info:
+        page.click("#register-form-container button[type='submit']")
+
+    response = response_info.value
+    assert response.ok, "Falló el registro del usuario de prueba"
+
+    # --- 2. ACCIÓN: Iniciar sesión con el nuevo usuario ---
+    # Esperar a que el formulario de login esté visible después del registro
+    expect(page.locator("#login-form-container")).to_be_visible()
+
+    page.fill("#login-username", unique_username)
+    page.fill("#login-password", password)
+
+    # Iniciar sesión y esperar respuesta de la API de token
+    with page.expect_response("**/api/token") as response_info:
+        page.click("#login-form button[type='submit']")
+
+    response = response_info.value
+    assert response.ok, "Falló el inicio de sesión"
+
+    # --- 3. VERIFICACIÓN: Comprobar el cambio de vista ---
+    # La vista de autenticación DEBE desaparecer
+    expect(page.locator("#auth-view")).not_to_be_visible()
+
+    # La vista de la aplicación DEBE aparecer
+    expect(page.locator("#app-view")).to_be_visible()
+
+    # Verificar contenido específico del mapa de habitaciones
+    # Esperamos a que aparezca al menos una tarjeta de habitación
+    expect(page.locator(".room-card").first).to_be_visible()
+    # Verificamos el título del mapa
+    expect(page.locator("#app-view h1")).to_have_text(
+        "🏡 Mapa de Habitaciones - SKYNET 2.0"
+    )

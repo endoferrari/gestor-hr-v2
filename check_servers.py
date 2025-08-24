@@ -9,7 +9,7 @@ import requests
 def check_backend():
     """Verifica si el backend está respondiendo."""
     try:
-        response = requests.get("http://localhost:8001", timeout=5)
+        response = requests.get("http://localhost:8002", timeout=5)
         print(f"✅ Backend: {response.status_code}")
         return True
     except Exception as e:

@@ -174,9 +174,7 @@ button[type="submit"]:disabled {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.form-container.hidden {
-    display: none;
-}
+/* La regla .hidden general maneja todos los casos de ocultación */
 
 /* Estilos para el panel de usuario */
 #user-panel {
@@ -202,4 +200,147 @@ button[type="submit"]:disabled {
     h1 {
         font-size: 24px;
     }
+}
+
+/* Estilos para el Mapa de Habitaciones */
+.room-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 16px;
+    padding: 20px 0;
+}
+
+.room-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.room-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.room-number {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.room-type {
+    font-size: 0.9em;
+    color: #666;
+    text-transform: capitalize;
+}
+
+.room-price {
+    font-size: 1em;
+    color: #333;
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+.room-status {
+    font-size: 0.8em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+}
+
+/* Colores según el estado de la habitación */
+.estado-disponible {
+    border-left: 5px solid #28a745;
+}
+.estado-disponible .room-status {
+    background-color: #28a745; /* Verde */
+}
+
+.estado-ocupada {
+    border-left: 5px solid #dc3545;
+}
+.estado-ocupada .room-status {
+    background-color: #dc3545; /* Rojo */
+}
+
+.estado-mantenimiento {
+    border-left: 5px solid #ffc107;
+}
+.estado-mantenimiento .room-status {
+    background-color: #ffc107; /* Amarillo */
+}
+
+.estado-limpieza {
+    border-left: 5px solid #17a2b8;
+}
+.estado-limpieza .room-status {
+    background-color: #17a2b8; /* Azul */
+}
+
+/* Estilos para las vistas principales */
+#auth-view, #app-view {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+#app-view .container {
+    max-width: 1200px;
+    width: 100%;
+}
+
+#app-view h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+#room-map-container {
+    margin: 20px 0;
+}
+
+#logout-button {
+    display: block;
+    margin: 30px auto 0;
+    padding: 12px 24px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+#logout-button:hover {
+    background: #c82333;
+}
+
+/* Estilos para el manejo de Vistas Principales */
+/* Esto asegura que las vistas principales ocupen el espacio
+  y centren su contenido.
+*/
+main {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+/* Esta es la regla CLAVE. El !important fuerza a que cualquier
+  elemento con esta clase se oculte, sin excepciones.
+*/
+.hidden {
+    display: none !important;
 }

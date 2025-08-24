@@ -181,3 +181,39 @@ export function addInputValidation() {
         });
     }
 }
+
+/**
+ * Renderiza la cuadrícula de habitaciones en un contenedor específico.
+ * @param {Array<Object>} rooms - La lista de habitaciones a mostrar.
+ * @param {HTMLElement} containerElement - El elemento del DOM donde se dibujará el mapa.
+ */
+export function renderRoomMap(rooms, containerElement) {
+    if (!containerElement) return;
+
+    // Limpiamos el contenedor por si tenía algo antes
+    containerElement.innerHTML = '';
+
+    // Creamos el contenedor de la cuadrícula
+    const grid = document.createElement('div');
+    grid.className = 'room-grid';
+
+    if (rooms.length === 0) {
+        grid.innerHTML = '<p>No hay habitaciones para mostrar.</p>';
+    } else {
+        rooms.forEach(room => {
+            const card = document.createElement('div');
+            // Añadimos una clase general y una específica para el estado
+            card.className = `room-card estado-${room.estado}`;
+
+            card.innerHTML = `
+                <div class="room-number">${room.numero}</div>
+                <div class="room-type">${room.tipo}</div>
+                <div class="room-price">$${room.precio_por_noche.toFixed(2)}</div>
+                <div class="room-status">${room.estado}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    containerElement.appendChild(grid);
+}
