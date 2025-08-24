@@ -1,29 +1,50 @@
-"""
-Aplicación principal FastAPI
-"""
-
-from typing import Dict
+# /app/main.py
 from fastapi import FastAPI
-from app.core.config import settings
+from fastapi.middleware.cors import CORSMiddleware
+from app.api.endpoints import users
 
+# Crear la aplicación FastAPI
 app = FastAPI(
-    title="Gestor HR v2.0",
-    description="Sistema de Gestión Hotelera moderno con FastAPI",
-    version="0.1.0",
+    title="Gestor HR - SKYNET 2.0",
+    version="2.0.0",
+    description="Sistema de gestión de recursos humanos - Backend API",
 )
+
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # En producción, especificar dominios específicos
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Incluir los routers
+app.include_router(users.router, prefix="/api", tags=["Users"])
 
 
 @app.get("/")
-async def root() -> Dict[str, str]:
-    """Endpoint de bienvenida"""
+def read_root():
     return {
-        "message": "¡Bienvenido a Gestor HR v2.0!",
-        "version": "0.1.0",
-        "docs": "/docs",
+        "proyecto": "Gestor HR - SKYNET 2.0",
+        "version": "2.0.0",
+        "status": "Running",
+        "descripcion": "Sistema de gestión de recursos humanos",
+        "endpoints": {
+            "health": "/health",
+            "docs": "/docs",
+            "users": "/api/users/",
+            "api_docs": "/redoc",
+        },
     }
 
 
 @app.get("/health")
-async def health_check() -> Dict[str, str]:
-    """Endpoint de verificación de salud"""
-    return {"status": "healthy", "environment": settings.ENVIRONMENT}
+def health_check():
+    return {"status": "OK", "service": "SKYNET HR 2.0"}
+
+
+# Event handlers comentados hasta que PostgreSQL esté configurado
+# @app.on_event("startup")
+# async def startup_event():
+#     create_tables()

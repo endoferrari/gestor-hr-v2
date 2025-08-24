@@ -8,6 +8,10 @@ strict = false
 ignore_missing_imports = true
 disallow_untyped_calls = false
 disallow_untyped_decorators = false
+# Excluir archivos de prueba temporales
+exclude = [
+    "test_.*\\.py$",
+]
 # Plugin de SQLAlchemy temporalmente deshabilitado hasta configurar la BD
 # plugins = ["sqlalchemy.ext.mypy.plugin"]
 
