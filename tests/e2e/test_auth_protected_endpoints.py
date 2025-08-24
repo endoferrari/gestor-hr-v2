@@ -21,7 +21,7 @@ def test_oauth2_token_endpoint(page: Page):
         "password": password,
     }
 
-    response = requests.post("http://localhost:8000/api/users/", json=user_data)
+    response = requests.post("http://localhost:8002/api/users/", json=user_data)
     assert response.status_code == 201, f"Error creando usuario: {response.text}"
 
     # 2. Obtener token OAuth2 usando requests
@@ -32,7 +32,7 @@ def test_oauth2_token_endpoint(page: Page):
     }
 
     response = requests.post(
-        "http://localhost:8001/api/token",
+        "http://localhost:8002/api/token",
         data=token_data,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
@@ -46,10 +46,10 @@ def test_oauth2_token_endpoint(page: Page):
     token = token_response["access_token"]
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-    response = requests.get("http://localhost:8000/api/users/me/", headers=headers)
-    assert (
-        response.status_code == 200
-    ), f"Error accediendo a endpoint protegido: {response.text}"
+    response = requests.get("http://localhost:8002/api/users/me/", headers=headers)
+    assert response.status_code == 200, (
+        f"Error accediendo a endpoint protegido: {response.text}"
+    )
 
     user_info = response.json()
     assert user_info["username"] == unique_username, f"Username incorrecto: {user_info}"
@@ -64,7 +64,7 @@ def test_protected_endpoint_without_token(page: Page):
 
     # Intentar acceder a endpoint protegido sin token
     test_no_auth_script = """
-    fetch('http://localhost:8001/api/users/me/', {
+    fetch('http://localhost:8002/api/users/me/', {
         method: 'GET'
     }).then(response => {
         window.noAuthResponse = {
@@ -98,7 +98,7 @@ def test_protected_endpoint_with_invalid_token(page: Page):
 
     # Intentar acceder con token inválido
     test_invalid_token_script = """
-    fetch('http://localhost:8001/api/users/me/', {
+    fetch('http://localhost:8002/api/users/me/', {
         method: 'GET',
         headers: {'Authorization': 'Bearer invalid_token_12345'}
     }).then(response => {
