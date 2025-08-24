@@ -7,7 +7,7 @@ import requests
 import json
 
 # Configuración
-API_BASE = "http://localhost:8000"
+API_BASE = "http://localhost:8002"
 
 
 def test_get_habitaciones():

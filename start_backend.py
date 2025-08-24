@@ -17,4 +17,4 @@ if __name__ == "__main__":
     print("Iniciando servidor FastAPI en http://localhost:8000")
     print("CORS habilitado para http://localhost:3000")
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=8002, reload=False)
