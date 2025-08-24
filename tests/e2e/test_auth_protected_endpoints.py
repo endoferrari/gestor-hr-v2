@@ -47,9 +47,9 @@ def test_oauth2_token_endpoint(page: Page):
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
     response = requests.get("http://localhost:8002/api/users/me/", headers=headers)
-    assert response.status_code == 200, (
-        f"Error accediendo a endpoint protegido: {response.text}"
-    )
+    assert (
+        response.status_code == 200
+    ), f"Error accediendo a endpoint protegido: {response.text}"
 
     user_info = response.json()
     assert user_info["username"] == unique_username, f"Username incorrecto: {user_info}"
