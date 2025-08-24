@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # <--- 1. IMPORTA ESTO
 
-from .api.endpoints import auth, users
+from .api.endpoints import auth, users, habitaciones
 from .db.database import engine
 from .models import user
 
@@ -31,6 +31,7 @@ app.add_middleware(
 # Incluimos los routers
 app.include_router(users.router, prefix="/api", tags=["Users"])
 app.include_router(auth.router, prefix="/api", tags=["Auth"])
+app.include_router(habitaciones.router, prefix="/api", tags=["Habitaciones"])
 
 
 @app.get("/")
