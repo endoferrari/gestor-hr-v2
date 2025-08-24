@@ -11,13 +11,13 @@ export function showMessage(message, type = 'success') {
         container.textContent = message;
         container.className = `message ${type}`;
 
-        // Auto-remover el mensaje después de 5 segundos
+        // Auto-remover el mensaje después de 10 segundos para dar tiempo a los tests
         setTimeout(() => {
             if (container.textContent === message) {
                 container.textContent = '';
                 container.className = '';
             }
-        }, 5000);
+        }, 10000);
     }
 }
 

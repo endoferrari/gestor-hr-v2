@@ -4,10 +4,10 @@ Servidor HTTP simple para servir el frontend
 """
 
 import http.server
-import socketserver
 import os
-import webbrowser
 from pathlib import Path
+import socketserver
+import webbrowser
 
 # Cambiar al directorio del frontend
 frontend_dir = Path(__file__).parent / "frontend"

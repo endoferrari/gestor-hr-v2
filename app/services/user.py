@@ -1,8 +1,9 @@
 # /app/services/user.py
-from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from .base import CRUDBase
+from sqlalchemy.orm import Session
+
 from .. import models, schemas
+from .base import CRUDBase
 
 # La configuración de hashing se queda igual
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,11 +30,12 @@ class UserService(CRUDBase[models.User, schemas.UserCreate]):
         db.refresh(db_obj)
         return db_obj
 
-    def get_by_email(self, db: Session, *, email: str) -> models.User | None:
+    # CAMBIO CLAVE: Renombramos la función y cambiamos el campo de búsqueda
+    def get_by_username(self, db: Session, *, username: str) -> models.User | None:
         """
-        Busca un usuario por su email.
+        Busca un usuario por su nombre de usuario.
         """
-        return db.query(self.model).filter(self.model.email == email).first()
+        return db.query(self.model).filter(self.model.username == username).first()
 
 
 # Creamos una instancia del servicio para poder usarla en otras partes del código

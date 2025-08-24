@@ -1,7 +1,9 @@
 # /app/services/base.py
-from typing import Any, Generic, Type, TypeVar
+from typing import Any, TypeVar
+
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
 from ..db.database import Base
 
 # Estos son tipos genéricos que nos ayudarán a que el código sea flexible
@@ -9,8 +11,8 @@ ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 
 
-class CRUDBase(Generic[ModelType, CreateSchemaType]):
-    def __init__(self, model: Type[ModelType]):
+class CRUDBase[ModelType: Base, CreateSchemaType: BaseModel]:
+    def __init__(self, model: type[ModelType]):
         """
         Clase CRUD base con métodos para Crear, Leer, Actualizar, Borrar.
         :param model: Un modelo de SQLAlchemy

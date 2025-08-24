@@ -5,8 +5,9 @@ Script para probar la conexión a PostgreSQL
 
 import os
 import sys
-from sqlalchemy import create_engine, text
+
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 # Cargar variables de entorno
 load_dotenv()

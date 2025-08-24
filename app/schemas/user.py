@@ -1,14 +1,21 @@
 # /app/schemas/user.py
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 # Propiedades compartidas
 class UserBase(BaseModel):
-    email: EmailStr
+    username: str  # CAMBIO CLAVE
+    full_name: str | None = None
 
 
 # Propiedades para recibir al crear un usuario
 class UserCreate(UserBase):
+    password: str
+
+
+# Propiedades para login
+class UserLogin(BaseModel):
+    username: str  # CAMBIO CLAVE
     password: str
 
 
@@ -18,3 +25,10 @@ class User(UserBase):
 
     class Config:
         from_attributes = True
+
+
+# Respuesta del token de acceso
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: User

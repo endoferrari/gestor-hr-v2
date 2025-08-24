@@ -3,6 +3,7 @@ Prueba básica para verificar que todo funciona
 """
 
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 client = TestClient(app)

@@ -3,8 +3,8 @@
 Script para verificar los datos en PostgreSQL
 """
 
-import sys
 from pathlib import Path
+import sys
 
 # Agregar el directorio raíz al Python path
 root_dir = Path(__file__).parent
@@ -28,7 +28,8 @@ def verify_database_data():
 
         for user in users:
             print(f"ID: {user.id}")
-            print(f"Email: {user.email}")
+            print(f"Username: {user.username}")
+            print(f"Full Name: {user.full_name}")
             print(f"Contraseña hasheada: {user.hashed_password[:30]}...")
             print("─" * 50)
 

@@ -3,8 +3,8 @@
 Script para probar la creación de usuarios con PostgreSQL
 """
 
-import sys
 from pathlib import Path
+import sys
 
 # Agregar el directorio raíz al Python path
 root_dir = Path(__file__).parent

@@ -3,9 +3,9 @@
 Script para verificar la conectividad a PostgreSQL y crear la base de datos si no existe.
 """
 
+from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-from dotenv import load_dotenv
 
 # Cargar variables de entorno
 load_dotenv()

@@ -2,8 +2,6 @@
 Configuración de la aplicación
 """
 
-from typing import Optional
-
 
 class Settings:
     """Configuración de la aplicación"""
@@ -14,9 +12,7 @@ class Settings:
     ENVIRONMENT: str = "development"
 
     # Base de datos
-    DATABASE_URL: Optional[str] = (
-        "postgresql://username:password@localhost/gestor_hr_v2"
-    )
+    DATABASE_URL: str | None = "postgresql://username:password@localhost/gestor_hr_v2"
 
     # Seguridad
     SECRET_KEY: str = "tu-clave-secreta-super-segura-cambia-esto-en-produccion"

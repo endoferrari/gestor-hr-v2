@@ -57,7 +57,8 @@ label {
 }
 
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="text"] {
     width: 100%;
     padding: 15px;
     border: 2px solid #e1e5e9;
@@ -67,7 +68,8 @@ input[type="password"] {
 }
 
 input[type="email"]:focus,
-input[type="password"]:focus {
+input[type="password"]:focus,
+input[type="text"]:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -136,6 +138,58 @@ button[type="submit"]:disabled {
     background-color: #d1ecf1;
     color: #0c5460;
     border: 1px solid #bee5eb;
+}
+
+/* Estilos para las pestañas */
+.tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e1e5e9;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-button.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+}
+
+.tab-button:hover:not(.active) {
+    color: #333;
+}
+
+/* Estilos para los contenedores de formularios */
+.form-container {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.form-container.hidden {
+    display: none;
+}
+
+/* Estilos para el panel de usuario */
+#user-panel {
+    text-align: center;
+    padding: 30px;
+}
+
+#user-info {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 16px;
 }
 
 /* Responsive design */

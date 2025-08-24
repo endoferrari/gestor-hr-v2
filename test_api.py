@@ -16,9 +16,16 @@ def test_user_registration():
 
     # Datos de prueba
     test_user = {
-        "email": "usuario_modular@skynet.com",
-        "name": "Usuario Modular",
-        "password": "modular123",
+        "email": "nuevo_usuario@ejemplo.com",
+        "name": "Usuario Nuevo",
+        "password": "password123",
+    }
+
+    # Datos de prueba
+    test_user = {
+        "email": "test@ejemplo.com",
+        "name": "Usuario Prueba",
+        "password": "password123",
     }
 
     print("🧪 Probando registro de usuario...")
@@ -51,7 +58,7 @@ def test_duplicate_email():
 
     # Mismo email de arriba
     test_user = {
-        "email": "nuevo_usuario@ejemplo.com",
+        "email": "test@ejemplo.com",
         "name": "Otro Usuario",
         "password": "password456",
     }

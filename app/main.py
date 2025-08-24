@@ -1,42 +1,41 @@
 # /app/main.py
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.api.endpoints import users
+from fastapi.middleware.cors import CORSMiddleware  # <--- 1. IMPORTA ESTO
 
-# Crear la aplicación FastAPI
-app = FastAPI(
-    title="Gestor HR - SKYNET 2.0",
-    version="2.0.0",
-    description="Sistema de gestión de recursos humanos - Backend API",
-)
+from .api.endpoints import auth, users
+from .db.database import engine
+from .models import user
 
-# Configurar CORS
+user.Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Gestor Total H&R API")
+
+# --- 2. AÑADE ESTE BLOQUE COMPLETO JUSTO AQUÍ ---
+# Lista de orígenes permitidos (tu servidor de frontend)
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    # Si usas Live Server de VS Code, puede ser un puerto diferente
+    "http://127.0.0.1:5500",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción, especificar dominios específicos
+    allow_origins=origins,  # Permite estos orígenes
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Permite todos los métodos (GET, POST, etc.)
+    allow_headers=["*"],  # Permite todas las cabeceras
 )
+# --- FIN DEL BLOQUE DE CORS ---
 
-# Incluir los routers
+# Incluimos los routers
 app.include_router(users.router, prefix="/api", tags=["Users"])
+app.include_router(auth.router, prefix="/api", tags=["Auth"])
 
 
 @app.get("/")
 def read_root():
-    return {
-        "proyecto": "Gestor HR - SKYNET 2.0",
-        "version": "2.0.0",
-        "status": "Running",
-        "descripcion": "Sistema de gestión de recursos humanos",
-        "endpoints": {
-            "health": "/health",
-            "docs": "/docs",
-            "users": "/api/users/",
-            "api_docs": "/redoc",
-        },
-    }
+    return {"Proyecto": "Gestor Total H&R"}
 
 
 @app.get("/health")

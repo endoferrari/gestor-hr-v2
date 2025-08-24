@@ -16,8 +16,82 @@ exclude = [
 # plugins = ["sqlalchemy.ext.mypy.plugin"]
 
 [tool.ruff]
-# Compatible con el formateador Black
+# Directorio de trabajo
+target-version = "py312"
+
+# Archivos a incluir/excluir
+include = ["*.py", "*.pyi", "**/pyproject.toml", "*.ipynb"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "alembic/versions/*.py",  # Excluir archivos de migración de Alembic
+]
+
+# Longitud máxima de línea
 line-length = 88
+
+[tool.ruff.lint]
+# Reglas a activar
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # Pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+    "S",  # bandit (security)
+]
+
+# Reglas a ignorar
+ignore = [
+    "E501",  # Línea demasiado larga (manejado por line-length)
+    "S101",  # Uso de assert (común en tests)
+    "S608",  # Posible inyección SQL (falsos positivos con SQLAlchemy)
+    "B008",  # Do not perform function calls in argument defaults (FastAPI dependencies)
+    "S104",  # Binding to all interfaces (necesario para desarrollo)
+    "S105",  # Hardcoded passwords (son ejemplos y configuraciones de desarrollo)
+    "S106",  # Hardcoded passwords in arguments (son ejemplos)
+    "S113",  # Requests without timeout (simplificar pruebas)
+]
+
+# Configuraciones específicas por archivo
+[tool.ruff.lint.per-file-ignores]
+# Tests pueden usar asserts y imports no utilizados
+"tests/**/*.py" = ["S101", "F401"]
+# Scripts pueden tener imports no utilizados
+"scripts/**/*.py" = ["F401"]
+# Archivos de configuración pueden tener syntax específica
+"test_api.py" = ["E999"]  # Syntax errors en archivo de prueba
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+force-sort-within-sections = true
+
+[tool.ruff.format]
+# Usar comillas dobles
+quote-style = "double"
+# Mantener trailing commas
+skip-magic-trailing-comma = false
 
 [project]
 name = "gestor-hr-v2"
@@ -32,7 +106,9 @@ dependencies = [
     "pytest",
     "mypy",
     "pre-commit",
-    "pytest-watch"
+    "pytest-watch",
+    "playwright",
+    "pytest-playwright"
 ]
 
 [build-system]
