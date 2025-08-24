@@ -1,5 +1,6 @@
 # /app/models/habitacion.py
 from sqlalchemy import Column, Integer, String, Float, Enum
+from sqlalchemy.orm import relationship
 from ..db.database import Base
 import enum
 
@@ -29,3 +30,6 @@ class Habitacion(Base):
         Enum(EstadoHabitacion), default=EstadoHabitacion.DISPONIBLE, nullable=False
     )
     precio_por_noche = Column(Float, nullable=False)
+
+    # Relación con hospedajes
+    hospedajes = relationship("Hospedaje", back_populates="habitacion")

@@ -1,5 +1,7 @@
 from .user import Token, User, UserBase, UserCreate, UserLogin
 from .habitacion import Habitacion, HabitacionBase, HabitacionCreate
+from .huesped import Huesped, HuespedBase, HuespedCreate
+from .hospedaje import Hospedaje, HospedajeBase, HospedajeCreate
 
 __all__ = [
     "UserBase",
@@ -10,4 +12,10 @@ __all__ = [
     "HabitacionBase",
     "HabitacionCreate",
     "Habitacion",
+    "HuespedBase",
+    "HuespedCreate",
+    "Huesped",
+    "HospedajeBase",
+    "HospedajeCreate",
+    "Hospedaje",
 ]

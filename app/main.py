@@ -2,11 +2,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # <--- 1. IMPORTA ESTO
 
-from .api.endpoints import auth, users, habitaciones
-from .db.database import engine
-from .models import user
+from .api.endpoints import auth, users, habitaciones, hospedaje
+from .db.database import engine, Base
 
-user.Base.metadata.create_all(bind=engine)
+# Esta línea le dice a SQLAlchemy que cree TODAS las tablas de los modelos importados
+# si es que no existen.
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Gestor Total H&R API")
 
@@ -32,11 +33,16 @@ app.add_middleware(
 app.include_router(users.router, prefix="/api", tags=["Users"])
 app.include_router(auth.router, prefix="/api", tags=["Auth"])
 app.include_router(habitaciones.router, prefix="/api", tags=["Habitaciones"])
+app.include_router(hospedaje.router, prefix="/api", tags=["Hospedaje"])
 
 
 @app.get("/")
 def read_root():
-    return {"Proyecto": "Gestor Total H&R"}
+    return {
+        "message": "Gestor Total H&R API - Sistema de gestión hotelera completo",
+        "version": "2.0",
+        "features": ["Autenticación", "Habitaciones", "Huéspedes", "Hospedaje"],
+    }
 
 
 @app.get("/health")
