@@ -24,3 +24,18 @@ def check_in_endpoint(
     Este es un endpoint protegido y requiere autenticación.
     """
     return hospedaje_service.check_in(db=db, obj_in=hospedaje_in)
+
+
+@router.post("/check-out/{habitacion_id}/", response_model=schemas.Hospedaje)
+def check_out_endpoint(
+    *,
+    db: Session = Depends(get_db),
+    habitacion_id: int,
+    current_user: models.User = Depends(get_current_active_user),
+):
+    """
+    Endpoint para realizar un Check-Out de una habitación.
+
+    Este es un endpoint protegido y requiere autenticación.
+    """
+    return hospedaje_service.check_out(db=db, habitacion_id=habitacion_id)

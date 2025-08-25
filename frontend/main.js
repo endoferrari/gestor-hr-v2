@@ -1,6 +1,6 @@
 // /frontend/main.js
-import { registerUser, loginUser, getHabitaciones, realizarCheckIn } from './api.js';
-import { showMessage, openCheckInModal, closeCheckInModal } from './ui.js';
+import { registerUser, loginUser, getHabitaciones, realizarCheckIn, checkOutHabitacion } from './api.js';
+import { showMessage, openCheckInModal, closeCheckInModal, openCheckOutModal, closeCheckOutModal } from './ui.js';
 import { saveToken, isLoggedIn, removeToken } from './session.js';
 
 // --- Lógica de Renderizado y Eventos del Mapa ---
@@ -12,30 +12,41 @@ function renderAndAttachListeners(rooms) {
     const grid = document.createElement('div');
     grid.className = 'room-grid';
 
-    if (rooms.length === 0) {
-        grid.innerHTML = '<p>No hay habitaciones para mostrar.</p>';
-    } else {
-        rooms.forEach(room => {
-            const card = document.createElement('div');
-            card.className = `room-card estado-${room.estado}`;
-            card.innerHTML = `
-                <div class="room-number">${room.numero}</div>
-                <div class="room-type">${room.tipo}</div>
-                <div class="room-price">$${room.precio_por_noche.toFixed(2)}</div>
-                <div class="room-status">${room.estado}</div>
-            `;
+    rooms.forEach(room => {
+        const card = document.createElement('div');
+        card.className = `room-card estado-${room.estado}`;
+        card.dataset.roomId = room.id; // Guardamos el ID para futuras referencias
+        card.innerHTML = `
+            <div class="room-number">${room.numero}</div>
+            <div class="room-type">${room.tipo}</div>
+            <div class="room-price">$${room.precio_por_noche.toFixed(2)}</div>
+            <div class="room-status">${room.estado}</div>
+        `;
 
-            // AÑADIMOS EL EVENT LISTENER PARA EL CHECK-IN
-            if (room.estado === 'disponible') {
-                card.addEventListener('click', () => {
-                    openCheckInModal(room);
-                });
-            } else {
-                card.classList.add('disabled'); // Opcional: estilo para no disponibles
-            }
-            grid.appendChild(card);
-        });
-    }
+        // ⭐ LÓGICA CLAVE: AÑADIMOS EL EVENTO DE CLIC AQUÍ ⭐
+        if (room.estado === 'disponible') {
+            // Solo las habitaciones disponibles son clicables para check-in.
+            card.addEventListener('click', () => {
+                openCheckInModal(room);
+            });
+        } else if (room.estado === 'ocupada') {
+            // Las habitaciones ocupadas son clicables para check-out.
+            card.addEventListener('click', () => {
+                // Para el check-out necesitamos obtener los datos del hospedaje
+                // Por ahora usaremos datos simulados, idealmente habría un endpoint
+                const hospedajeSimulado = {
+                    huesped: { nombre: 'Huésped Actual' },
+                    fecha_entrada: new Date().toISOString(),
+                    habitacion_id: room.id  // Almacenar el ID real de la habitación
+                };
+                openCheckOutModal(room, hospedajeSimulado);
+            });
+        } else {
+            card.classList.add('disabled');
+        }
+        grid.appendChild(card);
+    });
+
     container.appendChild(grid);
 }
 
@@ -87,6 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listeners para los botones de las pestañas
     document.getElementById('show-login-btn').addEventListener('click', () => showAuthForm('login'));
     document.getElementById('show-register-btn').addEventListener('click', () => showAuthForm('register'));
+
+    // Listener para el botón de cancelar del modal
+    document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+        closeCheckInModal();
+    });
 
     // Listener para el formulario de registro
     document.getElementById('registration-form').addEventListener('submit', async (event) => {
@@ -147,6 +163,28 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             showMessage(error.message, 'error');
         }
+    });
+
+    // Listener para el botón CONFIRMAR CHECK-OUT
+    document.getElementById('checkout-confirm-btn').addEventListener('click', async () => {
+        try {
+            // Obtener el ID de la habitación del modal de check-out
+            const checkoutModal = document.getElementById('check-out-modal');
+            const roomId = parseInt(checkoutModal.dataset.roomId);
+
+            await checkOutHabitacion(roomId);
+            showMessage('Check-out realizado con éxito.', 'success');
+            closeCheckOutModal();
+            // Actualizamos el mapa para ver el cambio de estado en tiempo real
+            await showAppView();
+        } catch (error) {
+            showMessage(error.message, 'error');
+        }
+    });
+
+    // Listener para el botón CANCELAR CHECK-OUT
+    document.getElementById('checkout-cancel-btn').addEventListener('click', () => {
+        closeCheckOutModal();
     });
 
     // Estado inicial al cargar la página

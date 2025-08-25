@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from datetime import datetime, timezone
 
 from .base import CRUDBase
 from ..models.hospedaje import Hospedaje
@@ -43,6 +44,53 @@ class HospedajeService(CRUDBase[Hospedaje, HospedajeCreate]):
         db.refresh(db_hospedaje)
 
         return db_hospedaje
+
+    def check_out(self, db: Session, *, habitacion_id: int) -> Hospedaje:
+        """
+        Realiza la operación de Check-Out para una habitación.
+        """
+        # 1. Buscar la habitación y verificar que esté ocupada
+        habitacion = habitacion_service.get(db, id=habitacion_id)
+        if not habitacion:
+            raise HTTPException(status_code=404, detail="La habitación no existe.")
+
+        if habitacion.estado != EstadoHabitacion.OCUPADA:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"La habitación {habitacion.numero} no está ocupada, no se puede hacer check-out.",
+            )
+
+        # 2. Encontrar el registro de hospedaje ACTIVO para esa habitación
+        # (El que no tiene fecha de salida)
+        hospedaje_activo = (
+            db.query(Hospedaje)
+            .filter(
+                Hospedaje.habitacion_id == habitacion_id,
+                Hospedaje.fecha_salida.is_(None),
+            )
+            .first()
+        )
+
+        if not hospedaje_activo:
+            # Esto sería un estado inconsistente de los datos, pero es bueno manejarlo
+            raise HTTPException(
+                status_code=404,
+                detail="No se encontró un hospedaje activo para esta habitación.",
+            )
+
+        # 3. Actualizar el hospedaje con la fecha de salida
+        hospedaje_activo.fecha_salida = datetime.now(timezone.utc)
+        db.add(hospedaje_activo)
+
+        # 4. Actualizar el estado de la habitación a "Limpieza"
+        habitacion.estado = EstadoHabitacion.LIMPIEZA
+        db.add(habitacion)
+
+        # 5. Guardar todos los cambios
+        db.commit()
+        db.refresh(hospedaje_activo)
+
+        return hospedaje_activo
 
 
 hospedaje_service = HospedajeService(Hospedaje)

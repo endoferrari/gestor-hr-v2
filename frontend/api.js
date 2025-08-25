@@ -122,3 +122,30 @@ export async function realizarCheckIn(habitacionId, huespedData) {
 
     return response.json();
 }
+
+/**
+ * Realiza check-out de una habitación ocupada.
+ * @param {number} habitacionId
+ * @returns {Promise<any>}
+ */
+export async function checkOutHabitacion(habitacionId) {
+    const token = getToken();
+    if (!token) {
+        throw new Error('No se encontró un token de autenticación.');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/check-out/${habitacionId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al realizar el check-out.');
+    }
+
+    return response.json();
+}
