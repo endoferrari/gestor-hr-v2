@@ -1,21 +1,49 @@
 // /frontend/main.js
-import { registerUser, loginUser, getHabitaciones } from './api.js';
-import { showMessage, renderRoomMap, CheckInModal, addRoomClickHandlers } from './ui.js';
+import { registerUser, loginUser, getHabitaciones, realizarCheckIn } from './api.js';
+import { showMessage, openCheckInModal, closeCheckInModal } from './ui.js';
 import { saveToken, isLoggedIn, removeToken } from './session.js';
 
-// Instancia global del modal de check-in
-let checkInModal;
+// --- Lógica de Renderizado y Eventos del Mapa ---
+function renderAndAttachListeners(rooms) {
+    const container = document.getElementById('room-map-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'room-grid';
+
+    if (rooms.length === 0) {
+        grid.innerHTML = '<p>No hay habitaciones para mostrar.</p>';
+    } else {
+        rooms.forEach(room => {
+            const card = document.createElement('div');
+            card.className = `room-card estado-${room.estado}`;
+            card.innerHTML = `
+                <div class="room-number">${room.numero}</div>
+                <div class="room-type">${room.tipo}</div>
+                <div class="room-price">$${room.precio_por_noche.toFixed(2)}</div>
+                <div class="room-status">${room.estado}</div>
+            `;
+
+            // AÑADIMOS EL EVENT LISTENER PARA EL CHECK-IN
+            if (room.estado === 'disponible') {
+                card.addEventListener('click', () => {
+                    openCheckInModal(room);
+                });
+            } else {
+                card.classList.add('disabled'); // Opcional: estilo para no disponibles
+            }
+            grid.appendChild(card);
+        });
+    }
+    container.appendChild(grid);
+}
+
 
 // --- Funciones para manejar la visibilidad de las vistas ---
-
 function showAuthView() {
     document.getElementById('auth-view').classList.remove('hidden');
     document.getElementById('app-view').classList.add('hidden');
-}
-
-function showAppView() {
-    document.getElementById('auth-view').classList.add('hidden');
-    document.getElementById('app-view').classList.remove('hidden');
 }
 
 function showAuthForm(formType) {
@@ -37,45 +65,25 @@ function showAuthForm(formType) {
     }
 }
 
-// --- Función para cargar habitaciones (exportada para uso en el modal) ---
+async function showAppView() {
+    document.getElementById('auth-view').classList.add('hidden');
+    document.getElementById('app-view').classList.remove('hidden');
 
-export async function loadRooms() {
     const roomMapContainer = document.getElementById('room-map-container');
-    if (!roomMapContainer) return;
-
     roomMapContainer.innerHTML = '<p>Cargando habitaciones...</p>';
     try {
         const rooms = await getHabitaciones();
-        renderRoomMap(rooms, roomMapContainer);
+        renderAndAttachListeners(rooms);
     } catch (error) {
         showMessage(error.message, 'error');
-        if (error.message.includes('Sesión expirada')) {
-            removeToken();
-            showAuthView();
-        }
-    }
-}
-
-// --- Función principal que decide qué vista mostrar ---
-
-async function updateUI() {
-    if (isLoggedIn()) {
-        showAppView();
-        await loadRooms();
-    } else {
+        removeToken();
         showAuthView();
     }
 }
 
+
 // --- Inicialización de la aplicación ---
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar el modal de check-in
-    checkInModal = new CheckInModal();
-
-    // Agregar handlers para clicks en habitaciones
-    addRoomClickHandlers(checkInModal);
-
     // Listeners para los botones de las pestañas
     document.getElementById('show-login-btn').addEventListener('click', () => showAuthForm('login'));
     document.getElementById('show-register-btn').addEventListener('click', () => showAuthForm('register'));
@@ -103,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await loginUser(username, password);
             saveToken(data.access_token);
-            updateUI(); // Esto ahora ocultará el login y mostrará el mapa
+            showAppView(); // Esto ahora ocultará el login y mostrará el mapa
         } catch (error) {
             showMessage(error.message, 'error');
         }
@@ -113,9 +121,38 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('logout-button').addEventListener('click', () => {
         removeToken();
         showMessage('Sesión cerrada exitosamente', 'success');
-        updateUI(); // Esto ocultará el mapa y mostrará el login
+        if (isLoggedIn()) {
+            showAppView();
+        } else {
+            showAuthView();
+        }
+    });
+
+    // Listener para el FORMULARIO DE CHECK-IN
+    document.getElementById('check-in-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const habitacionId = parseInt(event.target['modal-habitacion-id'].value);
+        const huespedData = {
+            nombre_completo: document.getElementById('modal-huesped-nombre').value,
+            telefono: document.getElementById('modal-huesped-telefono').value,
+            email: document.getElementById('modal-huesped-email').value,
+        };
+
+        try {
+            await realizarCheckIn(habitacionId, huespedData);
+            showMessage('Check-in realizado con éxito.', 'success');
+            closeCheckInModal();
+            // Actualizamos el mapa para ver el cambio de estado en tiempo real
+            await showAppView();
+        } catch (error) {
+            showMessage(error.message, 'error');
+        }
     });
 
     // Estado inicial al cargar la página
-    updateUI();
+    if (isLoggedIn()) {
+        showAppView();
+    } else {
+        showAuthView();
+    }
 });

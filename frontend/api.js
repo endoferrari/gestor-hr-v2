@@ -86,57 +86,39 @@ export async function getHabitaciones() {
 }
 
 /**
- * Realiza el check-in en una habitación específica.
- * @param {number} habitacionId - ID de la habitación para check-in.
- * @returns {Promise<{success: boolean, message?: string, data?: any}>}
+ * Realiza el check-in de un huésped en una habitación específica.
+ * @param {number} habitacionId
+ * @param {object} huespedData - { nombre_completo, telefono, email }
+ * @returns {Promise<any>}
  */
-export async function checkInRoom(habitacionId) {
+export async function realizarCheckIn(habitacionId, huespedData) {
     const token = getToken();
     if (!token) {
-        return {
-            success: false,
-            message: 'No hay token de autenticación. Por favor, inicie sesión.'
-        };
+        throw new Error('Autenticación requerida.');
     }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/check-in/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                habitacion_id: habitacionId
-            }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                return {
-                    success: false,
-                    message: 'Sesión expirada. Por favor, inicie sesión de nuevo.'
-                };
-            }
-            return {
-                success: false,
-                message: data.detail || 'Error al realizar el check-in'
-            };
+    const body = {
+        habitacion_id: habitacionId,
+        huesped: {
+            nombre_completo: huespedData.nombre_completo,
+            telefono: huespedData.telefono,
+            email: huespedData.email,
         }
+    };
 
-        return {
-            success: true,
-            message: 'Check-in realizado exitosamente',
-            data: data
-        };
+    const response = await fetch(`${API_BASE_URL}/check-in/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+    });
 
-    } catch (error) {
-        console.error('Error en checkInRoom:', error);
-        return {
-            success: false,
-            message: 'Error de conexión al realizar el check-in'
-        };
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al realizar el check-in.');
     }
+
+    return response.json();
 }

@@ -227,140 +227,34 @@ export function renderRoomMap(rooms, containerElement) {
     containerElement.appendChild(grid);
 }
 
+// Elementos del modal de check-in
+const modal = document.getElementById('check-in-modal');
+const modalRoomNumber = document.getElementById('modal-room-number');
+const modalHabitacionId = document.getElementById('modal-habitacion-id');
+const checkInForm = document.getElementById('check-in-form');
+const cancelBtn = document.getElementById('modal-cancel-btn');
+
 /**
- * Maneja el modal de check-in.
+ * Muestra el modal de check-in para una habitación específica.
+ * @param {object} room - El objeto de la habitación seleccionada.
  */
-export class CheckInModal {
-    constructor() {
-        this.modal = document.getElementById('checkInModal');
-        this.cancelBtn = document.getElementById('cancelCheckIn');
-        this.confirmBtn = document.getElementById('confirmCheckIn');
-        this.roomNumberSpan = document.getElementById('modalRoomNumber');
-        this.currentRoomId = null;
-
-        this.initializeEventListeners();
-    }
-
-    initializeEventListeners() {
-        // Cerrar modal al hacer clic en cancelar o fuera del modal
-        if (this.cancelBtn) {
-            this.cancelBtn.addEventListener('click', () => this.close());
-        }
-
-        if (this.modal) {
-            this.modal.addEventListener('click', (e) => {
-                if (e.target === this.modal) {
-                    this.close();
-                }
-            });
-        }
-
-        // Confirmar check-in
-        if (this.confirmBtn) {
-            this.confirmBtn.addEventListener('click', () => this.confirmCheckIn());
-        }
-
-        // Cerrar con ESC
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !this.modal.classList.contains('hidden')) {
-                this.close();
-            }
-        });
-    }
-
-    /**
-     * Abre el modal para una habitación específica.
-     * @param {number} roomId - ID de la habitación.
-     * @param {string} roomNumber - Número de la habitación.
-     */
-    open(roomId, roomNumber) {
-        this.currentRoomId = roomId;
-
-        if (this.roomNumberSpan) {
-            this.roomNumberSpan.textContent = roomNumber;
-        }
-
-        if (this.modal) {
-            this.modal.classList.remove('hidden');
-            // Focus en el botón de confirmar para accesibilidad
-            setTimeout(() => {
-                if (this.confirmBtn) {
-                    this.confirmBtn.focus();
-                }
-            }, 100);
-        }
-    }
-
-    /**
-     * Cierra el modal.
-     */
-    close() {
-        if (this.modal) {
-            this.modal.classList.add('hidden');
-            this.currentRoomId = null;
-        }
-    }
-
-    /**
-     * Confirma el check-in y llama a la API.
-     */
-    async confirmCheckIn() {
-        if (!this.currentRoomId) {
-            showToast('Error: No se ha seleccionado una habitación', 'error');
-            return;
-        }
-
-        try {
-            // Deshabilitar el botón mientras se procesa
-            if (this.confirmBtn) {
-                showLoading(this.confirmBtn);
-            }
-
-            // Importar la función de API dinámicamente
-            const { checkInRoom } = await import('./api.js');
-
-            // Realizar el check-in
-            const result = await checkInRoom(this.currentRoomId);
-
-            if (result.success) {
-                showToast(`Check-in exitoso en habitación ${this.roomNumberSpan?.textContent || this.currentRoomId}`, 'success');
-                this.close();
-
-                // Refrescar el mapa de habitaciones
-                const { loadRooms } = await import('./main.js');
-                if (loadRooms) {
-                    await loadRooms();
-                }
-            } else {
-                showToast(result.message || 'Error en el check-in', 'error');
-            }
-
-        } catch (error) {
-            console.error('Error en check-in:', error);
-            showToast('Error de conexión durante el check-in', 'error');
-        } finally {
-            // Restaurar el botón
-            if (this.confirmBtn) {
-                hideLoading(this.confirmBtn);
-            }
-        }
-    }
+export function openCheckInModal(room) {
+    if (!modal) return;
+    modalRoomNumber.textContent = `Habitación #${room.numero}`;
+    modalHabitacionId.value = room.id;
+    modal.classList.remove('hidden');
 }
 
 /**
- * Agrega funcionalidad de click en las tarjetas de habitación para abrir el modal de check-in.
- * @param {CheckInModal} checkInModal - Instancia del modal de check-in.
+ * Cierra el modal de check-in y resetea el formulario.
  */
-export function addRoomClickHandlers(checkInModal) {
-    // Usar delegación de eventos para manejar clicks en tarjetas de habitaciones
-    document.addEventListener('click', (e) => {
-        const roomCard = e.target.closest('.room-card');
-        if (roomCard && roomCard.classList.contains('estado-disponible')) {
-            const roomId = roomCard.dataset.roomId;
-            const roomNumber = roomCard.dataset.roomNumber;
-            if (roomId && roomNumber) {
-                checkInModal.open(parseInt(roomId), roomNumber);
-            }
-        }
-    });
+export function closeCheckInModal() {
+    if (!modal) return;
+    checkInForm.reset();
+    modal.classList.add('hidden');
+}
+
+// Añadimos un listener para el botón de cancelar directamente aquí
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeCheckInModal);
 }
