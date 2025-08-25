@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from .huesped import Huesped, HuespedCreate
 from .habitacion import Habitacion
@@ -21,5 +21,4 @@ class Hospedaje(HospedajeBase):
     huesped: Huesped  # Devolvemos el objeto completo del huésped
     habitacion: Habitacion  # Devolvemos el objeto completo de la habitación
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

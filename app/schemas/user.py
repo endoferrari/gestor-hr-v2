@@ -1,5 +1,5 @@
 # /app/schemas/user.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 # Propiedades compartidas
@@ -23,8 +23,7 @@ class UserLogin(BaseModel):
 class User(UserBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Respuesta del token de acceso

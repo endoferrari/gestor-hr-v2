@@ -1,5 +1,5 @@
 # /app/schemas/habitacion.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from ..models.habitacion import TipoHabitacion, EstadoHabitacion
 
 
@@ -20,5 +20,4 @@ class Habitacion(HabitacionBase):
     id: int
     estado: EstadoHabitacion
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
