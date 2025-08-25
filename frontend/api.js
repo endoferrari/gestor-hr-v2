@@ -84,3 +84,59 @@ export async function getHabitaciones() {
 
     return response.json();
 }
+
+/**
+ * Realiza el check-in en una habitación específica.
+ * @param {number} habitacionId - ID de la habitación para check-in.
+ * @returns {Promise<{success: boolean, message?: string, data?: any}>}
+ */
+export async function checkInRoom(habitacionId) {
+    const token = getToken();
+    if (!token) {
+        return {
+            success: false,
+            message: 'No hay token de autenticación. Por favor, inicie sesión.'
+        };
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/check-in/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                habitacion_id: habitacionId
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                return {
+                    success: false,
+                    message: 'Sesión expirada. Por favor, inicie sesión de nuevo.'
+                };
+            }
+            return {
+                success: false,
+                message: data.detail || 'Error al realizar el check-in'
+            };
+        }
+
+        return {
+            success: true,
+            message: 'Check-in realizado exitosamente',
+            data: data
+        };
+
+    } catch (error) {
+        console.error('Error en checkInRoom:', error);
+        return {
+            success: false,
+            message: 'Error de conexión al realizar el check-in'
+        };
+    }
+}

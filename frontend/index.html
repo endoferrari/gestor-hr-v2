@@ -62,6 +62,35 @@
         </div>
     </main>
 
+    <!-- Modal de Check-In -->
+    <div id="check-in-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2>Registrar Check-In</h2>
+            <h3 id="modal-room-number">Habitación #</h3>
+            <form id="check-in-form">
+                <input type="hidden" id="modal-habitacion-id" name="habitacion_id">
+
+                <div class="form-group">
+                    <label for="modal-huesped-nombre">Nombre Completo del Huésped:</label>
+                    <input type="text" id="modal-huesped-nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="modal-huesped-telefono">Teléfono (Opcional):</label>
+                    <input type="tel" id="modal-huesped-telefono">
+                </div>
+                <div class="form-group">
+                    <label for="modal-huesped-email">Email (Opcional):</label>
+                    <input type="email" id="modal-huesped-email">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Confirmar Check-In</button>
+                    <button type="button" id="modal-cancel-btn" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="config.js" type="module"></script>
     <script src="api.js" type="module"></script>
     <script src="ui.js" type="module"></script>

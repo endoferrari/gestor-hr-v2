@@ -1,7 +1,10 @@
 // /frontend/main.js
 import { registerUser, loginUser, getHabitaciones } from './api.js';
-import { showMessage, renderRoomMap } from './ui.js';
+import { showMessage, renderRoomMap, CheckInModal, addRoomClickHandlers } from './ui.js';
 import { saveToken, isLoggedIn, removeToken } from './session.js';
+
+// Instancia global del modal de check-in
+let checkInModal;
 
 // --- Funciones para manejar la visibilidad de las vistas ---
 
@@ -34,21 +37,31 @@ function showAuthForm(formType) {
     }
 }
 
+// --- Función para cargar habitaciones (exportada para uso en el modal) ---
+
+export async function loadRooms() {
+    const roomMapContainer = document.getElementById('room-map-container');
+    if (!roomMapContainer) return;
+
+    roomMapContainer.innerHTML = '<p>Cargando habitaciones...</p>';
+    try {
+        const rooms = await getHabitaciones();
+        renderRoomMap(rooms, roomMapContainer);
+    } catch (error) {
+        showMessage(error.message, 'error');
+        if (error.message.includes('Sesión expirada')) {
+            removeToken();
+            showAuthView();
+        }
+    }
+}
+
 // --- Función principal que decide qué vista mostrar ---
 
 async function updateUI() {
     if (isLoggedIn()) {
         showAppView();
-        const roomMapContainer = document.getElementById('room-map-container');
-        roomMapContainer.innerHTML = '<p>Cargando habitaciones...</p>';
-        try {
-            const rooms = await getHabitaciones();
-            renderRoomMap(rooms, roomMapContainer);
-        } catch (error) {
-            showMessage(error.message, 'error');
-            removeToken();
-            showAuthView(); // Si hay error, volvemos al login
-        }
+        await loadRooms();
     } else {
         showAuthView();
     }
@@ -57,6 +70,12 @@ async function updateUI() {
 // --- Inicialización de la aplicación ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el modal de check-in
+    checkInModal = new CheckInModal();
+
+    // Agregar handlers para clicks en habitaciones
+    addRoomClickHandlers(checkInModal);
+
     // Listeners para los botones de las pestañas
     document.getElementById('show-login-btn').addEventListener('click', () => showAuthForm('login'));
     document.getElementById('show-register-btn').addEventListener('click', () => showAuthForm('register'));
