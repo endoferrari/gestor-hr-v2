@@ -1,0 +1,14 @@
+# Ignorar carpetas de dependencias y entorno virtual
+node_modules/
+venv/
+
+# Ignorar historial de Git y configuraciones locales
+.git/
+.vscode/
+
+# Ignorar archivos de base de datos y caché
+__pycache__/
+*.db
+*.sqlite3
+alembic/versions/
+test-results/

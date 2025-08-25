@@ -1,0 +1,66 @@
+[tool.pytest.ini_options]
+# Le dice a pytest que busque módulos desde la carpeta raíz
+pythonpath = "."
+
+[tool.mypy]
+# Reglas estrictas para el chequeo de tipos
+strict = true
+ignore_missing_imports = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+# Ignorar errores específicos para FastAPI y pytest
+[[tool.mypy.overrides]]
+module = ["app.main"]
+disable_error_code = ["misc"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disable_error_code = ["misc"]
+
+[tool.ruff]
+# Compatible con el formateador Black
+line-length = 88
+
+[project]
+name = "gestor-hr-v3-profesional"
+version = "1.0.0"
+description = "Sistema profesional de gestión hotelera con FastAPI y SQLAlchemy"
+authors = [
+    {name = "Desarrollador Profesional", email = "dev@gestorhr.com"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi[all]>=0.104.0",
+    "sqlalchemy>=2.0.0",
+    "psycopg2-binary>=2.9.0",
+    "alembic>=1.12.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.4.0",
+    "pytest-watch>=4.2.0",
+    "httpx>=0.24.0",
+]
+
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "ARG", "SIM"]
+ignore = ["E501", "B008"]  # line too long (handled by formatter), FastAPI Depends()
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

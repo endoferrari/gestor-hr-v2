@@ -1,0 +1,109 @@
+# ===== GESTOR HR v3.0 - RUFF CONFIGURATION ===== #
+# Configuración de Ruff para el proyecto Gestor HR v3.0 Profesional
+
+# Configuración general
+target-version = "py312"
+line-length = 88
+indent-width = 4
+
+# Exclusiones
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".vscode",
+    "__pycache__",
+    "alembic/versions",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "test_venv_temp",
+    ".env",
+    "migrations/versions"
+]
+
+[lint]
+# Reglas habilitadas
+select = [
+    # PyFlakes
+    "F",
+    # pycodestyle
+    "E",
+    "W",
+    # isort
+    "I",
+    # pep8-naming
+    "N",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # flake8-comprehensions
+    "C4",
+    # flake8-pie
+    "PIE",
+    # flake8-quotes
+    "Q",
+    # flake8-return
+    "RET",
+]
+
+# Reglas específicas a ignorar
+ignore = [
+    # Demasiado agresivo para imports múltiples
+    "E501",  # Line too long
+    # Permitir imports de modelos para SQLAlchemy
+    "F401",  # Module imported but unused (needed for SQLAlchemy model discovery)
+    # Permitir print statements en scripts de desarrollo
+    "T201",  # print found
+    # Permitir argumentos posicionales largos
+    "PLR0913",  # Too many arguments
+    # Permitir expresiones complejas en algunos casos
+    "C901",  # Complex structure
+    # FastAPI patterns
+    "B008",  # Do not perform function call in argument defaults (FastAPI Depends)
+    "RET504",  # Unnecessary assignment before return (acceptable in FastAPI)
+]
+
+# Por archivo específico
+[lint.per-file-ignores]
+# Scripts de inicialización y pruebas
+"init_database.py" = ["F401"]  # Imports needed for table creation
+"crear_*.py" = ["F401", "T201"]  # Test scripts can have prints and imports
+"test_*.py" = ["F401", "T201"]  # Test files are more flexible
+"**/test_*.py" = ["F401", "T201"]
+"tests/**/*.py" = ["F401", "T201"]
+
+# Configuraciones de desarrollo
+"**/config*.py" = ["UP007"]  # Optional type annotations
+"**/settings*.py" = ["UP007"]
+
+[format]
+# Estilo de formateo
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+# Configuración específica para docstrings
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[lint.isort]
+combine-as-imports = true
+force-wrap-aliases = true
+known-first-party = ["app", "tests"]
+
+[lint.flake8-quotes]
+inline-quotes = "double"
+multiline-quotes = "double"
+
+[lint.pep8-naming]
+# Permitir algunos nombres específicos del dominio
+extend-ignore-names = ["db", "API", "URL", "ID", "UUID"]
+
+# Variables de clase pueden usar snake_case
+classmethod-decorators = ["classmethod", "validator", "root_validator"]

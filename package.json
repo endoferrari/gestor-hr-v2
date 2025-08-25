@@ -1,0 +1,28 @@
+{
+  "name": "gestor_hr_v3_profesional",
+  "version": "1.0.0",
+  "description": "Sistema profesional de gestión hotelera desarrollado con arquitectura moderna y escalable usando FastAPI, SQLAlchemy, PostgreSQL y Alembic.",
+  "type": "module",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test:e2e": "bunx playwright test",
+    "test:e2e:ui": "bunx playwright test --ui",
+    "test:e2e:debug": "bunx playwright test --debug",
+    "test:e2e:report": "bunx playwright show-report",
+    "test:codegen": "bunx playwright codegen localhost:8000",
+    "test:unit": "bun test tests/test_*.py",
+    "install:browsers": "bunx playwright install"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^22.5.4",
+    "@types/bun": "latest"
+  },
+  "keywords": ["hotel", "management", "fastapi", "typescript", "playwright"],
+  "author": "Gestor HR Team",
+  "license": "MIT"
+}

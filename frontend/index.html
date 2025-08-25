@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor HR v3.0 - Sistema Hotelero Profesional</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/frontend/styles.css">
+    <link rel="icon" type="image/x-icon" href="/frontend/favicon.ico">
+</head>
+<body>
+    <!-- Modal de Login -->
+    <div id="modal-login" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-mediano">
+            <div class="modal-header">
+                <h3>🔐 Iniciar Sesión</h3>
+            </div>
+            <div class="modal-body">
+                <form id="form-login">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" class="form-input" value="admin@test.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Contraseña:</label>
+                        <input type="password" id="login-password" class="form-input" value="admin123" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-login">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Principal -->
+    <header class="header-principal">
+        <div class="header-content">
+            <h1>🏨 Gestor HR v3.0</h1>
+            <div class="user-info">
+                <span id="usuario-actual">Admin</span>
+                <button id="btn-logout" class="btn btn-secondary">Cerrar Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegación Principal -->
+    <nav class="nav-principal">
+        <button class="nav-btn active" data-vista="vista-recepcion">🏠 Recepción</button>
+        <button class="nav-btn" data-vista="vista-pedido">💳 TPV / Pedidos</button>
+        <button class="nav-btn" data-vista="vista-reportes">📊 Reportes</button>
+        <button class="nav-btn" data-vista="vista-configuracion">⚙️ Configuración</button>
+    </nav>
+
+    <!-- Vista de Recepción -->
+    <main id="vista-recepcion" class="vista-contenido">
+        <div class="recepcion-header">
+            <h2>Mapa de Habitaciones</h2>
+            <div class="estado-leyenda">
+                <span class="estado-item disponible">Disponible</span>
+                <span class="estado-item ocupada">Ocupada</span>
+                <span class="estado-item limpieza">En Limpieza</span>
+                <span class="estado-item mantenimiento">Mantenimiento</span>
+            </div>
+        </div>
+
+        <div id="mapa-habitaciones-grid" class="mapa-habitaciones"></div>
+
+        <!-- Estadísticas rápidas -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3 id="total-disponibles">0</h3>
+                <p>Disponibles</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-ocupadas">0</h3>
+                <p>Ocupadas</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-limpieza">0</h3>
+                <p>En Limpieza</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="ingresos-dia">€0</h3>
+                <p>Ingresos Hoy</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vista TPV/Pedidos -->
+    <main id="vista-pedido" class="vista-contenido oculto">
+        <div class="tpv-container">
+            <div class="tpv-left">
+                <h2>Servicios y Productos</h2>
+                <div class="categorias-tabs">
+                    <button class="categoria-tab active" data-categoria="alojamiento">🛏️ Alojamiento</button>
+                    <button class="categoria-tab" data-categoria="bebidas">🍺 Bebidas</button>
+                    <button class="categoria-tab" data-categoria="comida">🍕 Comida</button>
+                    <button class="categoria-tab" data-categoria="servicios">🛎️ Servicios</button>
+                </div>
+                <div id="productos-grid" class="productos-grid"></div>
+            </div>
+
+            <div class="tpv-right">
+                <h2>Pedido Actual</h2>
+                <div class="pedido-info">
+                    <p><strong>Habitación:</strong> <span id="pedido-habitacion">-</span></p>
+                    <p><strong>Cliente:</strong> <span id="pedido-cliente">-</span></p>
+                </div>
+                <div id="lineas-pedido" class="lineas-pedido"></div>
+                <div class="pedido-totales">
+                    <div class="total-linea">
+                        <span>Subtotal:</span>
+                        <span id="pedido-subtotal">€0.00</span>
+                    </div>
+                    <div class="total-linea">
+                        <span>IVA:</span>
+                        <span id="pedido-iva">€0.00</span>
+                    </div>
+                    <div class="total-linea total-final">
+                        <span>Total:</span>
+                        <span id="pedido-total">€0.00</span>
+                    </div>
+                </div>
+                <div class="acciones-pedido">
+                    <button id="btn-procesar-pago" class="btn btn-primary btn-large">💳 Procesar Pago</button>
+                    <button id="btn-volver-recepcion" class="btn btn-secondary">🔙 Volver a Recepción</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vista de Reportes - Dashboard Ejecutivo Completo -->
+    <main id="vista-reportes" class="vista-contenido oculto">
+        <div class="reportes-container">
+            <div class="reportes-header">
+                <h2>📊 Dashboard Ejecutivo</h2>
+                <div class="reportes-controles">
+                    <button id="btn-actualizar-reportes" class="btn btn-primary">🔄 Actualizar</button>
+                    <input type="date" id="fecha-reporte" class="form-input" />
+                </div>
+            </div>
+
+            <!-- KPIs Principales -->
+            <div class="kpis-grid">
+                <div class="kpi-card kpi-ocupacion">
+                    <div class="kpi-icon">🏠</div>
+                    <div class="kpi-content">
+                        <h3 id="kpi-ocupacion">0%</h3>
+                        <p>Ocupación Total</p>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-ingresos">
+                    <div class="kpi-icon">💰</div>
+                    <div class="kpi-content">
+                        <h3 id="kpi-ingresos">€0</h3>
+                        <p>Ingresos Día</p>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-habitaciones">
+                    <div class="kpi-icon">🛏️</div>
+                    <div class="kpi-content">
+                        <h3 id="kpi-habitaciones-ocupadas">0</h3>
+                        <p>Hab. Ocupadas</p>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-productos">
+                    <div class="kpi-icon">📦</div>
+                    <div class="kpi-content">
+                        <h3 id="kpi-productos">0</h3>
+                        <p>Productos Activos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alertas Importantes -->
+            <div class="alertas-section">
+                <h3>� Alertas del Sistema</h3>
+                <div id="alertas-container" class="alertas-container">
+                    <div class="alerta alerta-info">
+                        <span>ℹ️ Cargando alertas...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos y Análisis Modernos -->
+            <div class="reportes-grid">
+                <!-- Gráfico de Distribución de Habitaciones -->
+                <div class="reporte-card chart-card">
+                    <h3>🏠 Distribución de Habitaciones</h3>
+                    <div class="chart-container">
+                        <canvas id="grafico-estado-habitaciones" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Top Productos -->
+                <div class="reporte-card chart-card">
+                    <h3>📦 Top 5 Productos Vendidos</h3>
+                    <div class="chart-container">
+                        <canvas id="grafico-top-productos" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Ingresos por Categoría -->
+                <div class="reporte-card chart-card">
+                    <h3>💰 Ingresos por Categoría</h3>
+                    <div class="chart-container">
+                        <canvas id="grafico-ingresos-categoria" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tendencias Rápidas -->
+                <div class="reporte-card">
+                    <h3>📈 Tendencias Clave</h3>
+                    <div id="tendencias" class="tendencias-container">
+                        <div class="tendencia-item">
+                            <span class="tendencia-label">Ocupación vs Semana Anterior:</span>
+                            <span id="tendencia-ocupacion" class="tendencia-valor">+0%</span>
+                        </div>
+                        <div class="tendencia-item">
+                            <span class="tendencia-label">Ingresos vs Ayer:</span>
+                            <span id="tendencia-ingresos" class="tendencia-valor">+0%</span>
+                        </div>
+                        <div class="tendencia-item">
+                            <span class="tendencia-label">Productos Activos:</span>
+                            <span id="tendencia-productos" class="tendencia-valor">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <main id="vista-configuracion" class="vista-contenido oculto">
+        <h2>⚙️ Configuración</h2>
+        <p>Panel de configuración en desarrollo...</p>
+    </main>
+
+    <!-- Modal de Operaciones de Habitación (EL CEREBRO) -->
+    <div id="modal-operacion-habitacion" class="modal-overlay oculto">
+        <div class="modal-content modal-grande">
+            <div class="modal-header">
+                <h3>Operaciones - Habitación <span id="op-numero-habitacion"></span></h3>
+                <button id="btn-cerrar-modal-op" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="op-seccion-tarifas">
+                    <h4>1. Selecciona una Tarifa</h4>
+                    <div id="op-tarifas-container" class="tarifas-container"></div>
+                </div>
+
+                <div id="op-seccion-cliente">
+                    <h4>2. Registra un Cliente (Opcional)</h4>
+                    <div class="cliente-container">
+                        <form id="form-cliente">
+                            <div class="form-group">
+                                <label for="cliente-nombre">Nombre Completo:</label>
+                                <input type="text" id="cliente-nombre" name="nombre" class="form-input" autocomplete="name">
+                            </div>
+                            <div class="form-group">
+                                <label for="cliente-email">Email:</label>
+                                <input type="email" id="cliente-email" name="email" class="form-input" autocomplete="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="cliente-telefono">Teléfono:</label>
+                                <input type="tel" id="cliente-telefono" name="telefono" class="form-input" autocomplete="tel">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="op-seccion-estancia" class="oculto">
+                    <h4>Detalles de la Estancia</h4>
+                    <div class="estancia-info">
+                        <p><strong>Cliente:</strong> <span id="estancia-cliente"></span></p>
+                        <p><strong>Check-in:</strong> <span id="estancia-checkin"></span></p>
+                        <p><strong>Noches:</strong> <span id="estancia-noches"></span></p>
+                        <p><strong>Total:</strong> <span id="estancia-total"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-cancelar-op">Cancelar</button>
+                <button type="button" id="btn-op-checkin" class="btn btn-primary oculto">Continuar a Pago</button>
+                <button type="button" id="btn-op-checkout" class="btn btn-danger oculto">Realizar Check-out</button>
+                <button type="button" id="btn-op-limpieza" class="btn btn-warning oculto">Enviar a Limpieza</button>
+                <button type="button" id="btn-op-disponible" class="btn btn-success oculto">Marcar como Disponible</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pago -->
+    <div id="modal-pago" class="modal-overlay oculto">
+        <div class="modal-content modal-mediano">
+            <div class="modal-header">
+                <h3>💳 Procesar Pago</h3>
+                <button id="btn-cerrar-modal-pago" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="pago-resumen">
+                    <h4>Resumen del Pedido</h4>
+                    <div id="pago-lineas"></div>
+                    <div class="pago-total">
+                        <strong>Total a Pagar: <span id="pago-total-amount">€0.00</span></strong>
+                    </div>
+                </div>
+
+                <form id="form-pago">
+                    <div class="form-group">
+                        <label>Método de Pago:</label>
+                        <div class="metodos-pago">
+                            <label class="metodo-pago">
+                                <input type="radio" name="metodo" value="efectivo" checked>
+                                💵 Efectivo
+                            </label>
+                            <label class="metodo-pago">
+                                <input type="radio" name="metodo" value="tarjeta">
+                                💳 Tarjeta
+                            </label>
+                            <label class="metodo-pago">
+                                <input type="radio" name="metodo" value="transferencia">
+                                🏦 Transferencia
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="grupo-efectivo">
+                        <label for="dinero-recibido">Dinero Recibido:</label>
+                        <input type="number" id="dinero-recibido" step="0.01" class="form-input" autocomplete="off">
+                        <div id="cambio-info" class="cambio-info"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-cancelar-pago">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-confirmar-pago">Confirmar Pago</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zona de Mensajes -->
+    <div id="mensajes-container" class="mensajes-container"></div>
+
+    <!-- Scripts -->
+    <script src="/frontend/config.js"></script>
+    <script src="/frontend/auth.js"></script>
+    <script src="/frontend/api.js"></script>
+    <script src="/frontend/ui.js"></script>
+    <script src="/frontend/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Gráficos - Dashboard BI</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .chart-card h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 10px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+        .status {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .error {
+            background: #ffeaea;
+            border: 1px solid #f44336;
+            color: #d32f2f;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏨 Dashboard BI - Prueba de Gráficos</h1>
+            <p>Sistema de Visualización de Datos con Chart.js</p>
+        </div>
+
+        <div id="status-container"></div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>🏠 Distribución de Habitaciones</h3>
+                <div class="chart-container">
+                    <canvas id="grafico-habitaciones"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>📦 Top Productos Vendidos</h3>
+                <div class="chart-container">
+                    <canvas id="grafico-productos"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>💰 Ingresos por Categoría</h3>
+                <div class="chart-container">
+                    <canvas id="grafico-ingresos"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>📊 Datos en Tiempo Real</h3>
+                <div id="datos-raw">
+                    <div class="loading">Cargando datos...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables para los gráficos
+        let charts = {};
+
+        // Función principal para cargar y mostrar datos
+        async function loadDashboardData() {
+            const statusContainer = document.getElementById('status-container');
+
+            try {
+                // Mostrar estado de carga
+                showStatus('🔄 Cargando datos del dashboard...', 'loading');
+
+                // Llamar a la API
+                const response = await fetch('/api/v1/reportes/dashboard-ejecutivo/');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Mostrar datos raw
+                document.getElementById('datos-raw').innerHTML = `
+                    <pre style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-size: 12px; overflow: auto;">
+                        ${JSON.stringify(data, null, 2)}
+                    </pre>
+                `;
+
+                // Crear gráficos
+                createHabitacionesChart(data);
+                createProductosChart(data);
+                createIngresosChart(data);
+
+                showStatus('✅ Dashboard cargado correctamente', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusContainer = document.getElementById('status-container');
+            const className = type === 'error' ? 'status error' : 'status';
+            statusContainer.innerHTML = `<div class="${className}">${message}</div>`;
+        }
+
+        function createHabitacionesChart(data) {
+            const ctx = document.getElementById('grafico-habitaciones');
+            if (!ctx) return;
+
+            if (charts.habitaciones) {
+                charts.habitaciones.destroy();
+            }
+
+            charts.habitaciones = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ocupadas', 'Disponibles', 'En Limpieza', 'Mantenimiento'],
+                    datasets: [{
+                        data: [
+                            data.habitaciones_ocupadas,
+                            data.habitaciones_disponibles,
+                            data.habitaciones_limpieza,
+                            data.habitaciones_mantenimiento
+                        ],
+                        backgroundColor: ['#dc3545', '#28a745', '#ffc107', '#6c757d'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createProductosChart(data) {
+            const ctx = document.getElementById('grafico-productos');
+            if (!ctx) return;
+
+            if (charts.productos) {
+                charts.productos.destroy();
+            }
+
+            charts.productos = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.productos_top.map(p => p.nombre),
+                    datasets: [{
+                        label: 'Unidades Vendidas',
+                        data: data.productos_top.map(p => p.unidades),
+                        backgroundColor: ['#4a90e2', '#50c878', '#ff6b6b', '#4ecdc4', '#45b7d1'],
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const producto = data.productos_top[context.dataIndex];
+                                    return `Ingresos: €${producto.ingresos.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createIngresosChart(data) {
+            const ctx = document.getElementById('grafico-ingresos');
+            if (!ctx) return;
+
+            if (charts.ingresos) {
+                charts.ingresos.destroy();
+            }
+
+            const ingresos = data.ingresos_semana;
+            charts.ingresos = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Habitaciones', 'Restaurante', 'Servicios'],
+                    datasets: [{
+                        data: [ingresos.habitaciones, ingresos.restaurante, ingresos.servicios],
+                        backgroundColor: ['#4a90e2', '#28a745', '#ffc107'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: €${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Cargar datos al iniciar la página
+        window.addEventListener('DOMContentLoaded', loadDashboardData);
+
+        // Actualizar cada 30 segundos
+        setInterval(loadDashboardData, 30000);
+    </script>
+</body>
+</html>
